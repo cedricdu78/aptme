@@ -1,0 +1,70 @@
+---
+
+www_dir: data/www
+tmp_dir: data/tmp
+
+clean: False
+clean_ignore_dirs: []
+
+max_thread: 1000
+
+http_proxy_enable: False
+http_proxy: http://192.168.1.1
+http_max_request: 40
+
+verify_file_mode: packages # value : packages or checksum (checksum slowly, warning max_thread cpu usage)
+
+wanted_files_limit_show: 20
+
+release_files: ['Release', 'Release.gpg']
+translation_files: ['Translation-en', 'Translation-fr']
+files_ext_search: ['.gz', '', '.xz', '.bz2']
+
+alias:
+  - link: old.docker.com
+    to: download.docker.com
+
+repos:
+
+- url: https://pkg.jenkins.io/debian-stable
+  #clone: data/www/pkg.jenkins.io/debian-stable
+  #override_path: old.jenkins.io/debian-stable
+  distributions:
+    - binary
+  components: []
+  archs: []
+
+- url: https://download.docker.com/linux/ubuntu
+  distributions:
+    #- focal
+    - jammy
+    - noble
+  components: [stable]
+  archs: [amd64]
+
+- url: http://ftp.fr.debian.org/debian
+  distributions:
+    - stable
+  components: [main]
+  archs: [amd64]
+
+# - url: http://archive.ubuntu.com/ubuntu
+#   distributions:
+#     # - bionic
+#     # - bionic-updates
+#     - bionic-security
+#     - focal
+#     # - focal-updates
+#     - focal-security
+#     - jammy
+#     # - jammy-updates
+#     # - jammy-security
+#     # - noble
+#     - noble-updates
+#     # - noble-security
+#   components:
+#     - main
+#     # - multiverse
+#     - restricted
+#     # - universe
+#   archs: [amd64]
