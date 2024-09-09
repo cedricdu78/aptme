@@ -43,9 +43,9 @@ class repositoryManager():
 
     def __init__(self, repo):
         self.url = repo['url']
-        self.distributions = repo['distributions']
-        self.components = repo['components']
-        self.archs = repo['archs']
+        self.distributions = [str(x) for x in repo['distributions']]
+        self.components = [str(x) for x in repo['components']]
+        self.archs = [str(x) for x in repo['archs']]
         self.is_clone = 'clone' in repo
         self.is_override = 'override_path' in repo
         self.ignore_error = 'ignore_error' in repo and repo['ignore_error']
@@ -79,7 +79,7 @@ class repositoryManager():
         self.files_present = []
         for dirpath, dirs, files in os.walk(self.repo_www):
             for f in files:
-                if f.endswith('.deb') or f.endswith('.udeb'):
+                if f.endswith('.deb') or f.endswith('.udeb') or f.endswith('.ddeb'):
                     self.debians_present.append(os.path.join(dirpath, f).replace(self.repo_www + '/', ''))
                 elif f.endswith('Packages'):
                     self.packages_present.append(os.path.join(dirpath, f))
@@ -99,7 +99,7 @@ class repositoryManager():
 
     def set_failure(self, filepath):
         self.error_files.append(filepath)
-        self.logger.error("Erreur durant le process avec le fichier %s !" % str(filepath))
+        self.logger.error("Erreur durant le process avec le fichier %s !" % filepath)
         self.failure = True
         return False
 
@@ -149,6 +149,9 @@ class repositoryManager():
 
         try:
             with http.request('GET', deb_url, preload_content=False) as r, open(filename_path, 'wb') as out_file:
+                if r.status != 200:
+                    self.logger.error("[%s] %s" % (r.status, deb_url))
+                    return self.set_failure(filename_path)
                 shutil.copyfileobj(r, out_file)
         except Exception as error:
             self.logger.exception(error)
@@ -206,9 +209,10 @@ class repositoryManager():
 
         futures = []
         files_changed = [f for f in files_old if f in files and files_old[f] != files[f]]
+        diff_file_set = set(files_changed + self.need_download)
         with concurrent.futures.ThreadPoolExecutor(max_workers=config['max_thread']) as executor:
             for f in files_old:
-                if f in set(files_changed + self.need_download): continue
+                if f in diff_file_set: continue
                 if config['verify_file_mode'] == 'checksum':
                     futures.append(executor.submit(self.is_checksum, f, files_old[f]['checksum']))
                 else: futures.append(executor.submit(self.is_size, f, files_old[f]['size']))
@@ -224,7 +228,10 @@ class repositoryManager():
             os.makedirs(os.path.dirname(os.path.join(self.repo_tmp, filename)), exist_ok=True)
             available_debs[filename] = files[filename]
 
-        self.logger.info("%s [%s debs | download %s]" % (packages_path, len(files), len(self.need_download)))
+        if len(self.need_download) > 0:
+            self.logger.warn("%s [%s debs | download %s]" % (packages_path, len(files), len(self.need_download)))
+        else:
+            self.logger.info("%s [%s debs]" % (packages_path, len(files)))
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=config['max_thread']) as executor:
             process_debians, futures = [], []
@@ -312,7 +319,7 @@ class repositoryManager():
         filter_components = '.*' if not self.components else f'^({"|".join(self.components)})/'
 
         translation_files = '.*/Translation-(fr|en)(\\.|$)'
-        packages_files = '(^|.*/)Packages(\\.|$)'
+        packages_files = '(^|.*/)Packages(\\.[a-z0-9]+)$'
 
         translation_list = [f for f in filenames if re.match(filter_components, f) and re.match(translation_files, f)]
         packages_list = [f for f in filenames if re.match(filter_components, f) and re.match(filter_archs, f) and re.match(packages_files, f)]
@@ -343,7 +350,7 @@ class repositoryManager():
 
         if len(self.components) > 0:
             for component in self.components:
-                if len([p for p in self.packages_list if re.match(component + '/.*/Packages(\\.|$)', p)]) == 0:
+                if len([p for p in self.packages_list if re.match(component + packages_files, p)]) == 0:
                     self.logger.error("[%s] [%s]: Aucun fichier Packages trouvé !" % (distribution, component))
                     return self.set_failure(release_path)
 
@@ -368,24 +375,30 @@ class repositoryManager():
     def sync(self):
 
         for distribution in self.distributions:
+
+            # Reset state for next distribution
+            self.failure = False
+            # Remove temporary repository
+            self.cleanup()
+
             base_path = '' if len(self.components) == 0 else 'dists'
             if not self.download_files(distribution, base_path, config['release_files']):
-                return False
+                continue
 
             if not self.get_release_infos(distribution, self.repo_tmp):
-                return False
+                continue
 
             if not self.download_files(distribution, base_path, self.translation_list):
-                return False
+                continue
 
             if not self.download_files(distribution, base_path, self.packages_list):
-                return False
+                continue
 
             for packages in self.packages_list:
                 filename, e = os.path.splitext(packages)
                 packages_path = os.path.join(base_path, distribution, filename)
                 if not self.process_packages(packages_path):
-                    return False
+                    break
 
             # Move temporary repository to www
             self.apply_repo()

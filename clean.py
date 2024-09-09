@@ -55,7 +55,7 @@ for repo in config['repos']:
 
 for repo in os.listdir(config['www_dir']):
     repo_path = os.path.join(config['www_dir'], repo)
-    if os.path.exists(repo_path) and os.path.islink(repo_path):
+    if not os.path.isdir(repo_path) or os.path.islink(repo_path):
         continue
 
     if repo in config['clean_ignore_dirs']:

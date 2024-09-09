@@ -1,70 +1,174 @@
 ---
 
-www_dir: data/www
-tmp_dir: data/tmp
+www_dir: 'data/www'
+tmp_dir: 'data/tmp'
 
-clean: False
-clean_ignore_dirs: []
-
-max_thread: 1000
+max_thread: 50
 
 http_proxy_enable: False
-http_proxy: http://192.168.1.1
+http_proxy: http://127.0.0.1:4141
 http_max_request: 40
 
 verify_file_mode: packages # value : packages or checksum (checksum slowly, warning max_thread cpu usage)
 
-wanted_files_limit_show: 20
-
+files_ext_search: ['.gz', '', '.xz', '.bz2']
 release_files: ['Release', 'Release.gpg']
 translation_files: ['Translation-en', 'Translation-fr']
-files_ext_search: ['.gz', '', '.xz', '.bz2']
+
+wanted_files_limit_show: 50
+
+clean: False
+clean_ignore_dirs:
+  - opentelemetry
+  - logstash-plugins
+  - opensearch-dataprepper
+
+# TODO : needed ?
+#security.debian.org/
+#deb.debian.org/
 
 alias:
-  - link: old.docker.com
-    to: download.docker.com
+  - to: archive.ubuntu.com
+    link: fr.archive.ubuntu.com
+  - to: archive.ubuntu.com
+    link: security.ubuntu.com
+  - to: ftp.debian.org
+    link: ftp.fr.debian.org
 
 repos:
 
-- url: https://pkg.jenkins.io/debian-stable
-  #clone: data/www/pkg.jenkins.io/debian-stable
-  #override_path: old.jenkins.io/debian-stable
-  distributions:
-    - binary
-  components: []
-  archs: []
+  ## xrdp-egfx
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/saxl/xrdp-egfx/ubuntu, distributions: [ jammy ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/saxl/xrdp-egfx/ubuntu, distributions: [ noble ], components: [ main ] }
 
-- url: https://download.docker.com/linux/ubuntu
-  distributions:
-    #- focal
-    - jammy
-    - noble
-  components: [stable]
-  archs: [amd64]
+  ## Jenkins
+  - { archs: [ ], url: https://pkg.jenkins.io/debian-stable, distributions: [ binary ], components: [ ] }
 
-- url: http://ftp.fr.debian.org/debian
-  distributions:
-    - stable
-  components: [main]
-  archs: [amd64]
+  ## Repo Officiel LemonLDAP NG
+  - { archs: [ amd64 ], url: https://lemonldap-ng.org/deb, distributions: [ stable ], components: [ main ] }
 
-# - url: http://archive.ubuntu.com/ubuntu
-#   distributions:
-#     # - bionic
-#     # - bionic-updates
-#     - bionic-security
-#     - focal
-#     # - focal-updates
-#     - focal-security
-#     - jammy
-#     # - jammy-updates
-#     # - jammy-security
-#     # - noble
-#     - noble-updates
-#     # - noble-security
-#   components:
-#     - main
-#     # - multiverse
-#     - restricted
-#     # - universe
-#   archs: [amd64]
+  ## PPA LibreOffice Still
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/libreoffice/libreoffice-still/ubuntu, distributions: [ focal ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/libreoffice/libreoffice-still/ubuntu, distributions: [ jammy ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/libreoffice/libreoffice-still/ubuntu, distributions: [ noble ], components: [ main ] }
+
+  ## PPA HAProxy 2.9
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/vbernat/haproxy-2.9/ubuntu, distributions: [ focal ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/vbernat/haproxy-2.9/ubuntu, distributions: [ jammy ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/vbernat/haproxy-2.9/ubuntu, distributions: [ noble ], components: [ main ] }
+
+  ## NodeJS 18.x
+  - { archs: [ amd64 ], url: https://deb.nodesource.com/node_18.x, distributions: [ focal ], components: [ main ] }
+  - { archs: [ amd64 ], url: https://deb.nodesource.com/node_18.x, distributions: [ jammy ], components: [ main ] }
+  - { archs: [ amd64 ], url: https://deb.nodesource.com/node_18.x, distributions: [ nodistro ], components: [ main ] }
+
+  ## NodeJS 16.x
+  - { archs: [ amd64 ], url: https://deb.nodesource.com/node_16.x, distributions: [ nodistro ], components: [ main ] }
+
+  ## PPA Openjdk-7 Xenial
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/openjdk-r/ppa/ubuntu, distributions: [ focal ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/openjdk-r/ppa/ubuntu, distributions: [ jammy ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/openjdk-r/ppa/ubuntu, distributions: [ noble ], components: [ main ] }
+
+  ## PPA Eclipse Adoptium OpenJDK
+  - { archs: [ amd64 ], url: https://packages.adoptium.net/artifactory/deb, distributions: [ focal ], components: [ main ] }
+  - { archs: [ amd64 ], url: https://packages.adoptium.net/artifactory/deb, distributions: [ jammy ], components: [ main ] }
+  - { archs: [ amd64 ], url: https://packages.adoptium.net/artifactory/deb, distributions: [ noble ], components: [ main ] }
+
+  ## PPA Eclipse Adoptium OpenJDK
+  - { archs: [ amd64 ], url: http://hwraid.le-vert.net/ubuntu, distributions: [ focal ], components: [ main ] }
+
+  ## PPA postgresql
+  - { archs: [ amd64 ], url: http://apt.postgresql.org/pub/repos/apt, distributions: [ focal-pgdg ], components: [ main, 14, 13 ] }
+  - { archs: [ amd64 ], url: http://apt.postgresql.org/pub/repos/apt, distributions: [ jammy-pgdg ], components: [ main, 14, 13 ] }
+  - { archs: [ amd64 ], url: http://apt.postgresql.org/pub/repos/apt, distributions: [ noble-pgdg ], components: [ main, 14, 13 ] }
+
+  ## PPA ansible
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/ansible/ansible/ubuntu, distributions: [ focal ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/ansible/ansible/ubuntu, distributions: [ jammy ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://ppa.launchpad.net/ansible/ansible/ubuntu, distributions: [ noble ], components: [ main ] }
+
+  ## OpenNebula
+  - { archs: [ amd64 ], url: https://downloads.opennebula.io/repo/6.2/Ubuntu/20.04, distributions: [ stable ], components: [ opennebula ] }
+  - { archs: [ amd64 ], url: https://downloads.opennebula.io/repo/6.8/Ubuntu/20.04, distributions: [ stable ], components: [ opennebula ] }
+  - { archs: [ amd64 ], url: https://downloads.opennebula.io/repo/6.10/Ubuntu/22.04, distributions: [ stable ], components: [ opennebula ] }
+  - { archs: [ amd64 ], url: https://downloads.opennebula.io/repo/6.10/Ubuntu/24.04, distributions: [ stable ], components: [ opennebula ] }
+
+  ## Ceph
+  - { archs: [ amd64 ], url: https://download.ceph.com/debian-quincy, distributions: [ focal ], components: [ main ] }
+
+  ## Cassandra
+  - { archs: [ amd64 ], url: https://downloads.apache.org/cassandra/debian, distributions: [ 21x ], components: [ main ], ignore_error: True }
+  - { archs: [ amd64 ], url: https://downloads.apache.org/cassandra/debian, distributions: [ 22x ], components: [ main ], ignore_error: True }
+  - { archs: [ amd64 ], url: https://downloads.apache.org/cassandra/debian, distributions: [ 30x ], components: [ main ], ignore_error: True }
+  - { archs: [ amd64 ], url: https://downloads.apache.org/cassandra/debian, distributions: [ 311x ], components: [ main ], ignore_error: True }
+  - { archs: [ amd64 ], url: https://downloads.apache.org/cassandra/debian, distributions: [ 40x ], components: [ main ], ignore_error: True }
+  - { archs: [ amd64 ], url: https://downloads.apache.org/cassandra/debian, distributions: [ 41x ], components: [ main ], ignore_error: True }
+
+  ## DELL openmanage
+  - { archs: [ amd64 ], url: http://linux.dell.com/repo/community/openmanage/1001/focal, distributions: [ focal ], components: [ main ] }
+  - { archs: [ amd64 ], url: http://linux.dell.com/repo/community/openmanage/11000/jammy, distributions: [ jammy ], components: [ main ] }
+
+  ## Elasticsearch 8.x
+  - { archs: [ amd64 ], url: https://artifacts.elastic.co/packages/8.x/apt, distributions: [ stable ], components: [ main ] }
+
+  ## Opensearch 2.x
+  - { archs: [ amd64 ], url: https://artifacts.opensearch.org/releases/bundle/opensearch-dashboards/2.x/apt, distributions: [ stable ], components: [ main ] }
+  - { archs: [ amd64 ], url: https://artifacts.opensearch.org/releases/bundle/opensearch/2.x/apt, distributions: [ stable ], components: [ main ] }
+
+  ## Client Mattermost
+  - { archs: [ amd64 ], url: https://deb.packages.mattermost.com, distributions: [ stable ], components: [ main ] }
+
+  ## Virtualbox
+  - { archs: [ amd64 ], url: http://download.virtualbox.org/virtualbox/debian, distributions: [ focal ], components: [ contrib ] }
+  - { archs: [ amd64 ], url: http://download.virtualbox.org/virtualbox/debian, distributions: [ jammy ], components: [ contrib ] }
+  - { archs: [ amd64 ], url: http://download.virtualbox.org/virtualbox/debian, distributions: [ noble ], components: [ contrib ] }
+
+  ## QGIS
+  - { archs: [ amd64 ], url: https://qgis.org/debian, distributions: [ bullseye ], components: [ main ] }
+
+  # Docker
+  - { archs: [ amd64 ], url: https://download.docker.com/linux/ubuntu, distributions: [ focal ], components: [ stable ] }
+  - { archs: [ amd64 ], url: https://download.docker.com/linux/ubuntu, distributions: [ jammy ], components: [ stable ] }
+  - { archs: [ amd64 ], url: https://download.docker.com/linux/ubuntu, distributions: [ noble ], components: [ stable ] }
+
+  ## Debian
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ jessie ], components: [ main, contrib, non-free ], ignore_error: True }
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ jessie-updates ], components: [ main, contrib, non-free ], ignore_error: True }
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ stretch ], components: [ main, contrib, non-free ], ignore_error: True }
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ stretch-updates ], components: [ main, contrib, non-free ], ignore_error: True }
+
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ buster ], components: [ main, contrib, non-free ] }
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ buster-updates ], components: [ main, contrib, non-free ] }
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ bullseye ], components: [ main, contrib, non-free ] }
+  - { archs: [ amd64 ], url: http://ftp.debian.org/debian, distributions: [ bullseye-updates ], components: [ main, contrib, non-free ] }
+
+  ## Ubuntu
+  - { archs: [ amd64, i386 ], url: http://old-releases.ubuntu.com/ubuntu, distributions: [ precise ], components: [ main, restricted, multiverse, universe ], override_path: archive.ubuntu.com/ubuntu }
+  - { archs: [ amd64, i386 ], url: http://old-releases.ubuntu.com/ubuntu, distributions: [ precise-updates ], components: [ main, restricted, multiverse, universe ], override_path: archive.ubuntu.com/ubuntu }
+  - { archs: [ amd64, i386 ], url: http://old-releases.ubuntu.com/ubuntu, distributions: [ precise-security ], components: [ main, restricted, multiverse, universe ], override_path: archive.ubuntu.com/ubuntu }
+  - { archs: [ amd64, i386 ], url: http://old-releases.ubuntu.com/ubuntu, distributions: [ precise-backports ], components: [ main, restricted, multiverse, universe ], override_path: archive.ubuntu.com/ubuntu }
+
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ bionic ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ bionic-updates ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ bionic-security ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ bionic-backports ], components: [ main, restricted, multiverse, universe ] }
+
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ focal ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ focal-updates ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ focal-security ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ focal-backports ], components: [ main, restricted, multiverse, universe ] }
+
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ jammy ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ jammy-updates ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ jammy-security ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ jammy-backports ], components: [ main, restricted, multiverse, universe ] }
+
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ noble ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ noble-updates ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ noble-security ], components: [ main, restricted, multiverse, universe ] }
+  - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ noble-backports ], components: [ main, restricted, multiverse, universe ] }
+
+#      - dep11/icons-*x*@2.tar.gz
+#      - cnf/Commands-amd64.xz
+#      - dist-upgrader-all

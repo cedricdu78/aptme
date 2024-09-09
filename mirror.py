@@ -12,7 +12,7 @@ import glob
 import lib.tools as tools
 import lib.repo as aptme
 
-logging.basicConfig(format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s', level=logging.INFO)
+logging.basicConfig(format='[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s', level=logging.INFO)
 
 if not os.path.exists('config.yaml'):
     logging.error('Le fichier config.yaml est manquant !')
@@ -39,7 +39,9 @@ for repo in config['repos']:
     # Remove temporary repository
     r_manager.cleanup()
 
-    repo_errors.extend(r_manager.error_files)
+    if not r_manager.ignore_error:
+        repo_errors.extend(r_manager.error_files)
+
     del r_manager
 
 # Clean tmp_dir
