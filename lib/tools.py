@@ -52,6 +52,14 @@ def remove_when_not_missing(type_file, missing, unused, clean):
                 if clean:
                     os.remove(f)
 
+def splitext(filename):
+    filename_dot = filename.split('.')
+    if len(filename_dot) > 1:
+        filename, extension = filename_dot[0], '.' + ('.'.join(filename_dot[1:]))
+    else: 
+        filename, extension = filename_dot[0], ''
+    return filename, extension
+
 def configure_alias(aliases, www_dir):
 
     for alias in aliases:

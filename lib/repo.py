@@ -248,12 +248,12 @@ class repositoryManager():
 
     def get_files(self, file_url, file_path):
 
-        filename, extension = os.path.splitext(file_path)
+        filename, extension = tools.splitext(file_path)
 
         if self.is_clone:
             try: 
                 if extension != '' and extension in config['files_ext_search']:
-                    file_path = Filename    
+                    file_path = filename    
                 file_data = open(os.path.join(self.clone, file_path), 'rb').read()
             except Exception as error:
                 self.logger.exception(error)
@@ -266,6 +266,7 @@ class repositoryManager():
                 return self.set_failure(file_url)
 
             if r.status_code != 200:
+                self.logger.error("[%s] %s" % (r.status_code, file_url))
                 return self.set_failure(file_url)
 
             file_data = r.content
@@ -302,15 +303,19 @@ class repositoryManager():
         filter_archs = '.*' if not self.archs else f'.*-({"|".join(self.archs)})(/|\\.|$)'
         filter_components = '.*' if not self.components else f'^({"|".join(self.components)})/'
 
+        commands_files = '(^|.*/)Commands' + filter_archs
+        icons_files = '.*/dep11/icons-([0-9]+)x([0-9]+).*.tar.gz'
         translation_files = '.*/Translation-(fr|en)(\\.|$)'
-        packages_files = '(^|.*/)Packages(\\.[a-z0-9]+)$'
+        packages_files = '(^|.*/)Packages(\\.[a-z0-9]+|)$'
 
+        commands_list = [f for f in filenames if re.match(filter_components, f) and re.match(commands_files, f)]
+        icons_list = [f for f in filenames if re.match(filter_components, f) and re.match(icons_files, f)]
         translation_list = [f for f in filenames if re.match(filter_components, f) and re.match(translation_files, f)]
         packages_list = [f for f in filenames if re.match(filter_components, f) and re.match(filter_archs, f) and re.match(packages_files, f)]
 
         filenames_exts = {}
-        for filename in translation_list + packages_list:
-            f, e = os.path.splitext(filename)
+        for filename in translation_list + commands_list + packages_list:
+            f, e = tools.splitext(filename)
             filenames_exts.setdefault(f, []).append(e)
             filenames_exts[f] = list(set(config['files_ext_search']) & set(filenames_exts[f]))
 
@@ -319,14 +324,18 @@ class repositoryManager():
             self.logger.error(f"{working_dir} [{distribution}]: Erreur des extensions ne sont pas gérées ({no_extensions})!")
             return self.set_failure(release_path)
 
+        self.icons_list = icons_list
         self.packages_list = []
         self.translation_list = []
+        self.commands_list = []
         for f, ext in filenames_exts.items():
             filename = f"{f}{sorted(ext, reverse=True)[0]}"
             if filename in packages_list:
                 self.packages_list.append(filename)
             elif filename in translation_list:
                 self.translation_list.append(filename)
+            elif filename in commands_list:
+                self.commands_list.append(filename)
 
         if len(self.packages_list) == 0:
             self.logger.error("Aucun fichier Packages trouvé pour la distribution %s !" % (distribution))
@@ -372,14 +381,13 @@ class repositoryManager():
             if not self.get_release_infos(distribution, self.repo_tmp):
                 continue
 
-            if not self.download_files(distribution, base_path, self.translation_list):
-                continue
-
-            if not self.download_files(distribution, base_path, self.packages_list):
+            if not self.download_files(distribution, base_path, \
+                    self.translation_list + self.packages_list + \
+                    self.commands_list + self.icons_list):
                 continue
 
             for packages in self.packages_list:
-                filename, e = os.path.splitext(packages)
+                filename, e = tools.splitext(packages)
                 packages_path = os.path.join(base_path, distribution, filename)
                 if not self.process_packages(packages_path):
                     break
