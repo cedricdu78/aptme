@@ -58,8 +58,8 @@ missing_packages = list(set(packages_list) - set(packages_present))
 unused_debians = list(set(debians_present) - set(debians_list))
 unused_packages = list(set(packages_present) - set(packages_list))
 
-tools.remove_when_not_missing('debians', missing_debians, unused_debians)
-tools.remove_when_not_missing('Packages', missing_packages, unused_packages)
+tools.remove_when_not_missing('debians', missing_debians, unused_debians, config['clean'])
+tools.remove_when_not_missing('Packages', missing_packages, unused_packages, config['clean'])
 
 for repo in os.listdir(config['www_dir']):
     repo_path = os.path.join(config['www_dir'], repo)

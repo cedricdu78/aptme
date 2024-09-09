@@ -39,19 +39,17 @@ def save_file(path, data):
 def merge_dir(source, destination):
     shutil.copytree(source, destination, dirs_exist_ok=True, copy_function = shutil.move)
 
-def remove_when_not_missing(type_file, missing, unused):
+def remove_when_not_missing(type_file, missing, unused, clean):
     if len(missing) > 0:
         logging.info("Des fichiers %s semblent manquant, pas de suppression." % type_file)
-        if len(missing) < config['wanted_files_limit_show']:
-            for f in missing:
-                logging.info("%s: missing" % f)
-        else: logging.info("Trop de fichier, on affiche pas la liste.")
+        for f in missing:
+            logging.info("%s: missing" % f)
     else:
         if len(unused) > 0:
             logging.info("Des fichiers %s existent mais ne sont pas utile ..." % type_file)
             for f in unused:
                 logging.info("%s: suppression ..." % f)
-                if config['clean']:
+                if clean:
                     os.remove(f)
 
 def configure_alias(aliases, www_dir):
