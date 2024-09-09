@@ -6,6 +6,7 @@ import yaml
 import zlib
 import shutil
 import lib.repo as aptme
+import lib.tools as tools
 
 logging.basicConfig(format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s', level=logging.INFO)
 
@@ -22,13 +23,18 @@ if not os.path.exists(config['www_dir']):
     logging.info("Data dir not present, exit ...")
     exit(0)
 
+debians_list = []
+packages_list = []
+debians_present = []
+packages_present = []
 for repo in config['repos']:
 
     r_manager = aptme.repositoryManager(repo)
     r_manager.initialize()
 
-    debians_list = []
-    packages_list = []
+    debians_present.extend([os.path.join(r_manager.repo_www, x) for x in r_manager.debians_present])
+    packages_present.extend(r_manager.packages_present)
+
     for distribution in r_manager.distributions:
         if not r_manager.get_release_infos(distribution, r_manager.repo_www):
             continue
@@ -37,21 +43,23 @@ for repo in config['repos']:
         for packages in r_manager.packages_list:
             packages_path, extension = os.path.splitext(os.path.join(r_manager.repo_www, base_path, distribution, packages))
             filenames, files = r_manager.package_to_list(packages_path)
-            debians_list.extend(filenames)
+            debians_list.extend([os.path.join(r_manager.repo_www, x) for x in filenames])
             packages_list.append(packages_path)
 
-    missing_debians = list(set(debians_list) - set(r_manager.debians_present))
-    missing_packages = list(set(packages_list) - set(r_manager.packages_present))
-    unused_debians = list(set(r_manager.debians_present) - set(debians_list))
-    unused_packages = list(set(r_manager.packages_present) - set(packages_list))
-
-    r_manager.logger.info("packages [exists: %s | not exists: %s | not used: %s] debians [exists: %s | not exists: %s | not used: %s]"
-        % (len(packages_list), len(missing_packages), len(unused_packages), len(debians_list), len(missing_debians), len(unused_debians)))
-
-    r_manager.remove_when_not_missing('debians', missing_debians, unused_debians)
-    r_manager.remove_when_not_missing('Packages', missing_packages, unused_packages)
-
     del r_manager
+
+debians_list = list(set(debians_list))
+packages_list = list(set(packages_list))
+debians_present = list(set(debians_present))
+packages_present = list(set(packages_present))
+
+missing_debians = list(set(debians_list) - set(debians_present))
+missing_packages = list(set(packages_list) - set(packages_present))
+unused_debians = list(set(debians_present) - set(debians_list))
+unused_packages = list(set(packages_present) - set(packages_list))
+
+tools.remove_when_not_missing('debians', missing_debians, unused_debians)
+tools.remove_when_not_missing('Packages', missing_packages, unused_packages)
 
 for repo in os.listdir(config['www_dir']):
     repo_path = os.path.join(config['www_dir'], repo)

@@ -103,22 +103,6 @@ class repositoryManager():
         self.failure = True
         return False
 
-
-    def remove_when_not_missing(self, type_file, missing, unused):
-        if len(missing) > 0:
-            self.logger.info("Des fichiers %s semblent manquant, pas de suppression." % type_file)
-            if len(missing) < config['wanted_files_limit_show']:
-                for f in missing:
-                    self.logger.info("%s: missing" % f)
-            else: self.logger.info("Trop de fichier, on affiche pas la liste.")
-        else:
-            if len(unused) > 0:
-                self.logger.info("Des fichiers %s existent mais ne sont pas utile ..." % type_file)
-                for f in unused:
-                    self.logger.info("%s: suppression ..." % f)
-                    if config['clean']:
-                        os.remove(f)
-
     def is_checksum(self, filename, checksum):
         filename_path = os.path.join(self.repo_www, filename)
         is_same, sha256 = tools.checksha256(filename_path, checksum)
