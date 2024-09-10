@@ -13,9 +13,6 @@ verify_file_mode: packages # value : packages or checksum (checksum slowly, warn
 
 files_ext_search: ['.gz', '', '.xz', '.bz2']
 release_files: ['Release', 'Release.gpg']
-translation_files: ['Translation-en', 'Translation-fr']
-
-wanted_files_limit_show: 50
 
 clean: False
 clean_ignore_dirs:
