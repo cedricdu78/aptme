@@ -230,7 +230,7 @@ class repositoryManager():
 
                 prc = int(done_length / total_length * 100)
                 if prc > next_prc or done_length == total_length:
-                    print("[%s%s] (%s/%s) Debians %s%%" % ('=' * prc, ' ' * (100-prc),
+                    logging.info("[%s%s] (%s/%s) Debians %s%%" % ('=' * prc, ' ' * (100-prc),
                         round(done_length, 2),
                         round(total_length, 2), prc))
                     next_prc = prc + 10

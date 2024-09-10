@@ -27,6 +27,7 @@ debians_list = []
 packages_list = []
 debians_present = []
 packages_present = []
+repo_errors = []
 for repo in config['repos']:
 
     r_manager = aptme.repositoryManager(repo)
@@ -45,6 +46,9 @@ for repo in config['repos']:
             filenames, files = r_manager.package_to_list(packages_path)
             debians_list.extend([os.path.join(r_manager.repo_www, x) for x in filenames])
             packages_list.append(packages_path)
+
+    if not r_manager.ignore_error:
+        repo_errors.extend(r_manager.error_files)
 
     del r_manager
 
@@ -77,5 +81,9 @@ for repo in os.listdir(config['www_dir']):
         shutil.rmtree(repo_path)
 
 logging.info('#######################"')
-logging.info("Finished")
+# Show errors
+for f in repo_errors:
+    logging.error(f)
+
+logging.info("Finished" + (' simulation' if not config['clean'] else ''))
 logging.info('#######################"')

@@ -35,6 +35,7 @@ alias:
   - to: ftp.debian.org
     link: ftp.fr.debian.org
 
+# WARNING : Si un repo, une distrib ou un component n'est plus dans la liste, il sera automatiquement supprimé par le script clean.py
 repos:
 
   ## xrdp-egfx
@@ -168,7 +169,3 @@ repos:
   - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ noble-updates ], components: [ main, restricted, multiverse, universe ] }
   - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ noble-security ], components: [ main, restricted, multiverse, universe ] }
   - { archs: [ amd64 ], url: http://archive.ubuntu.com/ubuntu, distributions: [ noble-backports ], components: [ main, restricted, multiverse, universe ] }
-
-#      - dep11/icons-*x*@2.tar.gz
-#      - cnf/Commands-amd64.xz
-#      - dist-upgrader-all
